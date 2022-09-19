@@ -1,0 +1,34 @@
+Option Explicit
+Dim fso, cd, objC, objRd, objwR, linecount, before, change, after, i
+Const vbRead=1, vbWrite=2
+
+Set fso = CreateObject("Scripting.FileSystemObject")
+cd = Replace(Wscript.ScriptFullName, Wscript.ScriptName, "Text.txt")
+
+Set objC = fso.OpenTextFile(cd, vbRead)
+ linecount=0
+ Do Until objC.AtEndOfStream
+ linecount = linecount+1
+ objC.SkipLine
+ Loop
+objC.Close
+
+Const env =2
+Set objRd = fso.OpenTextFile(cd, vbRead)
+For i = 1 to linecount
+ If i < 2 Then
+  before = before & objRd.ReadLine & vbCrLf
+ ElseIf i = 2 and env=1 Then
+  change = Replace(objRd.ReadLine & vbCrLf, "Dev", "Local")
+  ElseIf i = 2 and env=2 Then
+  change = Replace(objRd.ReadLine & vbCrLf, "Local", "Dev")
+ ElseIf i > 2 Then
+  after = objRd.ReadAll
+  Exit For
+ End If
+Next
+objRd.Close
+
+Set objwR = fso.OpenTextFile(cd, vbWrite)
+objwR.Write before & change & after
+objRd.Close
